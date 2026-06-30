@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">通知记录器</string>
+    <string name="service_label">通知记录服务</string>
+</resources>
