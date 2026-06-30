@@ -28,6 +28,7 @@ class NotificationCollectorService : NotificationListenerService() {
 
     // 内存缓存监控集合，避免每条通知都读 DataStore
     private val monitored = MutableStateFlow<Set<String>>(emptySet())
+    private val captureAll = MutableStateFlow(false)
 
     override fun onCreate() {
         super.onCreate()
@@ -36,6 +37,9 @@ class NotificationCollectorService : NotificationListenerService() {
         scope.launch {
             settings.monitoredPackages.collect { monitored.value = it }
         }
+        scope.launch {
+            settings.captureAll.collect { captureAll.value = it }
+        }
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
@@ -43,7 +47,8 @@ class NotificationCollectorService : NotificationListenerService() {
         val pkg = notif.packageName ?: return
         // 不记录本应用自身，避免自循环
         if (pkg == packageName) return
-        if (pkg !in monitored.value) return
+        // 调试开关开启时记录全部；否则只记录勾选的应用
+        if (!captureAll.value && pkg !in monitored.value) return
 
         val entity = extract(notif)
         scope.launch {

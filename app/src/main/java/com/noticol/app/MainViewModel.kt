@@ -42,6 +42,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { settings.setThemeMode(mode) }
     }
 
+    val captureAll: StateFlow<Boolean> =
+        settings.captureAll
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun setCaptureAll(enabled: Boolean) {
+        viewModelScope.launch { settings.setCaptureAll(enabled) }
+    }
+
     private val installedFlow = kotlinx.coroutines.flow.MutableStateFlow<List<InstalledApp>>(emptyList())
     val installed: StateFlow<List<InstalledApp>> = installedFlow
 

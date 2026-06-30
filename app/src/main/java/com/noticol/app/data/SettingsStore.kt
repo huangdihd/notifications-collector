@@ -1,6 +1,7 @@
 package com.noticol.app.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -19,9 +20,18 @@ class SettingsStore(private val context: Context) {
 
     private val monitoredKey = stringSetPreferencesKey("monitored_packages")
     private val themeKey = intPreferencesKey("theme_mode")
+    private val captureAllKey = booleanPreferencesKey("capture_all")
 
     val monitoredPackages: Flow<Set<String>> =
         context.dataStore.data.map { it[monitoredKey] ?: emptySet() }
+
+    /** 调试：记录所有应用的通知（忽略勾选过滤），用于定位通知真实来源包名 */
+    val captureAll: Flow<Boolean> =
+        context.dataStore.data.map { it[captureAllKey] ?: false }
+
+    suspend fun setCaptureAll(enabled: Boolean) {
+        context.dataStore.edit { it[captureAllKey] = enabled }
+    }
 
     /** 主题模式：0=跟随系统，1=亮色，2=暗色 */
     val themeMode: Flow<Int> =

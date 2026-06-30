@@ -221,6 +221,13 @@ private fun NotificationRow(n: NotificationEntity) {
             )
             Text(timeFmt(n.postTime), style = MaterialTheme.typography.labelSmall)
         }
+        Text(
+            n.packageName,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         if (n.title.isNotEmpty()) {
             Text(n.title, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
@@ -236,12 +243,33 @@ private fun NotificationRow(n: NotificationEntity) {
 private fun AppsTab(vm: MainViewModel) {
     val installed by vm.installed.collectAsState()
     val monitored by vm.monitored.collectAsState()
+    val captureAll by vm.captureAll.collectAsState()
     var showSystem by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) { vm.loadInstalledApps() }
 
     Column(Modifier.fillMaxSize()) {
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("调试：记录所有应用通知", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        "打开后忽略下面的勾选，记录全部通知。用来查看消息真实来源包名，定位后请关闭。",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                Switch(checked = captureAll, onCheckedChange = { vm.setCaptureAll(it) })
+            }
+        }
+        HorizontalDivider()
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
